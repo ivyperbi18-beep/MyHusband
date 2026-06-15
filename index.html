@@ -185,6 +185,9 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--text);min
   <div class="dot"></div>
 </div>
 
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <!-- EDIT MODAL -->
 <div class="modal" id="modal">
   <div class="modal-head">
@@ -579,7 +582,10 @@ function sendMsg(from) {
   document.getElementById(urgId).checked = false;
 
   const msgId = 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-  const msg = { id: msgId, from, text, urgent, ts: Date.now(), read: false };
+  const localTs = Date.now();
+  const msg = { id: msgId, from, text, urgent, ts: localTs, read: false };
+
+  // Show immediately locally — don't wait for Firebase
   state.messages.push(msg);
   saveMessages();
   renderMessages();
@@ -587,25 +593,36 @@ function sendMsg(from) {
   if (db) {
     try {
       db.collection('seabridge').doc('main').collection('messages').doc(msgId)
-        .set({ id: msgId, from, text, urgent, ts: firebase.firestore.FieldValue.serverTimestamp(), read: false });
+        .set({ id: msgId, from, text, urgent, ts: localTs, read: false })
+        .then(() => {
+          // Once confirmed in Firebase, mark as truly synced
+          const m = state.messages.find(m => m.id === msgId);
+          if (m) { m.synced = true; renderMessages(); }
+        }).catch(() => {});
     } catch(e) {}
   }
 }
 
-// When a view is opened, mark incoming messages as read (delivered ✓✓)
+// When a view is opened, mark incoming messages as read
 function markRead(viewer) {
   let changed = false;
+  const batch = db ? db.batch() : null;
   state.messages.forEach(msg => {
     if (msg.from !== viewer && !msg.read) {
       msg.read = true;
       changed = true;
-      // Update in Firebase too
-      if (db && msg.id) {
-        try { db.collection('seabridge').doc('main').collection('messages').doc(msg.id).update({ read: true }); } catch(e) {}
+      if (batch && msg.id) {
+        try {
+          const ref = db.collection('seabridge').doc('main').collection('messages').doc(msg.id);
+          batch.update(ref, { read: true });
+        } catch(e) {}
       }
     }
   });
-  if (changed) { saveMessages(); renderMessages(); broadcastMessages(); }
+  if (changed) {
+    if (batch) batch.commit().catch(() => {});
+    saveMessages(); renderMessages(); broadcastMessages();
+  }
 }
 
 function renderMessages() {
@@ -634,13 +651,15 @@ function renderMessages() {
       // Avatar for other side only
       const otherAv = isFromMe ? '' :
         '<div class="bubble-av ' + (isMxMsg ? 'mx-bav' : 'ivy-bav') + '">' + (isMxMsg ? '⚓' : '🌸') + '</div>';
-      // Checkmarks: ✓ sent, ✓✓ delivered (read)
+      // Checkmarks: ✓ sent locally, ✓✓ teal = other person has read it
       let checks = '';
       if (isFromMe) {
         if (msg.read) {
-          checks = '<span class="meta-check delivered">✓✓</span>';
+          checks = '<span class="meta-check delivered" title="Read">✓✓</span>';
+        } else if (msg.synced || db) {
+          checks = '<span class="meta-check sent" title="Delivered">✓✓</span>';
         } else {
-          checks = '<span class="meta-check sent">✓</span>';
+          checks = '<span class="meta-check sent" title="Sending...">✓</span>';
         }
       }
       el.innerHTML +=
@@ -733,12 +752,14 @@ function saveTz() {
   state.tz = parseInt(document.getElementById('tz-sel').value);
   saveSettings();
   if (db) db.collection('seabridge').doc('main').set({ tz: state.tz }, { merge: true }).catch(() => {});
+  toast('Timezone saved');
 }
 function detectTz() {
   state.tz = -new Date().getTimezoneOffset() / 60;
   buildTzSelect();
   saveSettings();
   if (db) db.collection('seabridge').doc('main').set({ tz: state.tz }, { merge: true }).catch(() => {});
+  toast('Timezone detected — GMT' + (state.tz >= 0 ? '+' : '') + state.tz);
 }
 function saveVessel() {
   state.vesselName = document.getElementById('s-vessel').value;
@@ -748,6 +769,7 @@ function saveVessel() {
   saveSettings();
   updateSubtitle();
   if (db) db.collection('seabridge').doc('main').set({ vesselName: state.vesselName, position: state.position, signonDate: state.signonDate, signoffDate: state.signoffDate }, { merge: true }).catch(() => {});
+  toast('Vessel info saved');
 }
 function saveLocation() {
   state.shipArea = document.getElementById('s-area').value;
@@ -761,6 +783,7 @@ function saveLocation() {
     shipArea: state.shipArea, voyageFrom: state.voyageFrom,
     voyageTo: state.voyageTo, voyageEta: state.voyageEta, voyageNote: state.voyageNote
   }, { merge: true }).catch(() => {});
+  toast("Ivy's voyage info updated");
 }
 function fillSettingsFields() {
   const v = (id, val) => { const e = document.getElementById(id); if (e) e.value = val || ''; };
@@ -812,6 +835,7 @@ function saveModal() {
   if (db) db.collection('seabridge').doc('main').set({ schedule: state.schedule }, { merge: true }).catch(() => {});
   closeModal();
   renderSchedule();
+  toast('Schedule saved');
 }
 
 // ═══════════════════════════════════════════
@@ -869,15 +893,17 @@ function initFirebase() {
         renderSchedule(); updateSubtitle(); fillSettingsFields(); buildTzSelect(); renderVoyage();
       }
     }, () => {});
-    // Listen to messages — real-time cross-device sync
+    // Listen to messages — no orderBy to avoid index delay, sort client-side
     db.collection('seabridge').doc('main').collection('messages')
-      .orderBy('ts').onSnapshot(snap => {
+      .onSnapshot({ includeMetadataChanges: false }, snap => {
         state.messages = [];
         snap.forEach(doc => {
           const d = doc.data();
-          const ts = d.ts && d.ts.seconds ? d.ts.seconds * 1000 : (d.ts || Date.now());
+          const ts = d.ts && d.ts.seconds ? d.ts.seconds * 1000 : (typeof d.ts === 'number' ? d.ts : Date.now());
           state.messages.push({ id: doc.id, from: d.from, text: d.text, urgent: d.urgent||false, ts, read: d.read||false });
         });
+        // Sort by timestamp client-side
+        state.messages.sort((a, b) => a.ts - b.ts);
         saveMessages();
         renderMessages();
       }, () => {});
@@ -927,6 +953,20 @@ function renderVoyage() {
       noteEl.style.display = 'none';
     }
   }
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+function toast(msg, isError) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = (isError ? '⚠️ ' : '✓ ') + msg;
+  el.style.background = isError ? '#3a1e1e' : '#1e3a2e';
+  el.style.borderColor = isError ? 'var(--red)' : 'var(--green)';
+  el.style.color = isError ? 'var(--red)' : 'var(--green)';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
 }
 
 // ═══════════════════════════════════════════

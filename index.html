@@ -53,52 +53,66 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--text);min
 .sdot.past{background:var(--muted)}
 .sdot.upcoming{background:var(--navy-light);border:1.5px solid var(--muted)}
 .sname{font-size:13px;font-weight:500;color:var(--text);flex:1}
-/* MESSAGES */
-.msg-panel{border-radius:16px;overflow:hidden;background:var(--navy-mid);border:1px solid rgba(0,180,216,.2)}
+/* MESSAGES — iMessage style */
+.msg-panel{border-radius:16px;overflow:hidden;background:var(--navy-mid);border:1px solid rgba(0,180,216,.2);display:flex;flex-direction:column}
 .msg-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);background:var(--navy)}
-.msg-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.msg-avatar.ivy-av{background:rgba(244,162,97,.15);border:1.5px solid var(--amber)}
-.msg-avatar.mx-av{background:rgba(0,180,216,.15);border:1.5px solid var(--teal)}
+.msg-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.msg-avatar.ivy-av{background:rgba(244,162,97,.15);border:2px solid var(--amber)}
+.msg-avatar.mx-av{background:rgba(0,180,216,.15);border:2px solid var(--teal)}
 .msg-info{flex:1}
-.msg-name{font-size:13px;font-weight:600;color:var(--text)}
-.msg-status{font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px;margin-top:1px}
-.msg-status::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block}
-.urg-badge{background:rgba(230,57,70,.2);color:var(--red);font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid rgba(230,57,70,.3);display:none;animation:urgp 1.5s infinite}
+.msg-name{font-size:14px;font-weight:600;color:var(--text)}
+.msg-status{font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px;margin-top:2px}
+.msg-status::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite}
+.urg-badge{background:rgba(230,57,70,.2);color:var(--red);font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid rgba(230,57,70,.3);display:none;animation:urgp 1.5s infinite;margin-left:6px}
 .urg-badge.on{display:inline-flex}
 @keyframes urgp{0%,100%{opacity:1}50%{opacity:.4}}
-.msg-list{padding:14px 12px;height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
-.msg-row{display:flex;flex-direction:column}
-.msg-row.out{align-items:flex-end}
-.msg-row.inc{align-items:flex-start}
-.msg-who{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;padding:0 4px}
-.msg-row.out .msg-who{color:var(--teal)}
-.msg-row.out.ivy-out .msg-who{color:var(--amber)}
-.msg-row.inc .msg-who{color:var(--amber)}
-.msg-row.inc.ivy-inc .msg-who{color:var(--teal)}
-.bubble{max-width:82%;padding:10px 14px;font-size:13px;line-height:1.5;word-break:break-word}
-.msg-row.out .bubble{background:var(--teal);color:var(--navy);border-radius:16px 16px 4px 16px;font-weight:500}
-.msg-row.out.ivy-out .bubble{background:var(--amber);color:var(--navy);border-radius:16px 16px 4px 16px;font-weight:500}
-.msg-row.inc .bubble{background:var(--navy-light);color:var(--text);border-radius:16px 16px 16px 4px;border:1px solid var(--border)}
-.bubble.urg{box-shadow:0 0 0 2px var(--red)}
-.urg-lbl{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--red);margin-bottom:4px;letter-spacing:.08em}
-.msg-meta{font-size:10px;color:var(--muted);margin-top:3px;padding:0 4px}
-.msg-row.out .msg-meta{text-align:right;color:var(--dim)}
-.tick{color:var(--teal);font-size:11px}
-.date-div{text-align:center;font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:4px 0 8px;display:flex;align-items:center;gap:8px}
+/* Message list */
+.msg-list{padding:12px 10px;height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;background:var(--navy)}
+.date-div{text-align:center;font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:10px 0 6px;display:flex;align-items:center;gap:8px}
 .date-div::before,.date-div::after{content:'';flex:1;height:1px;background:var(--border)}
-.msg-foot{border-top:1px solid var(--border);background:var(--navy)}
+/* Each message group */
+.msg-group{display:flex;flex-direction:column;margin-bottom:2px}
+/* iMessage bubbles — sender LEFT, receiver RIGHT */
+.msg-group.from-me{align-items:flex-end;padding-left:60px}
+.msg-group.from-other{align-items:flex-start;padding-right:60px}
+.bubble-wrap{display:flex;align-items:flex-end;gap:6px}
+.msg-group.from-me .bubble-wrap{flex-direction:row-reverse}
+.bubble-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-bottom:2px}
+.bubble-av.ivy-bav{background:rgba(244,162,97,.15);border:1.5px solid var(--amber)}
+.bubble-av.mx-bav{background:rgba(0,180,216,.15);border:1.5px solid var(--teal)}
+.bubble{padding:9px 13px;font-size:14px;line-height:1.45;word-break:break-word;max-width:100%}
+/* My bubbles — right side, teal (Maxwell) or amber (Ivy) */
+.msg-group.from-me .bubble{border-radius:18px 18px 4px 18px}
+.msg-group.from-me.is-maxwell .bubble{background:var(--teal);color:var(--navy);font-weight:500}
+.msg-group.from-me.is-ivy .bubble{background:var(--amber);color:var(--navy);font-weight:500}
+/* Their bubbles — left side, dark */
+.msg-group.from-other .bubble{background:#1e3352;color:var(--text);border-radius:18px 18px 18px 4px;border:1px solid rgba(255,255,255,.06)}
+/* Urgent */
+.bubble.urg{box-shadow:0 0 0 2px var(--red)!important}
+.urg-lbl{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--red);margin-bottom:3px;letter-spacing:.08em}
+/* Meta row */
+.msg-meta{display:flex;align-items:center;gap:4px;margin-top:3px;padding:0 4px}
+.msg-group.from-me .msg-meta{justify-content:flex-end}
+.msg-group.from-other .msg-meta{justify-content:flex-start}
+.meta-time{font-size:10px;color:var(--muted)}
+.meta-check{font-size:11px;color:var(--muted)}
+.meta-check.sent{color:var(--muted)}
+.meta-check.delivered{color:var(--teal)}
+/* Footer */
+.msg-foot{border-top:1px solid var(--border);background:var(--navy-mid)}
 .urg-row{display:flex;align-items:center;gap:7px;padding:8px 14px 0;cursor:pointer}
 .urg-row input{cursor:pointer;accent-color:var(--red);width:13px;height:13px}
 .urg-row label{font-size:11px;color:var(--dim);cursor:pointer}
 .urg-row label span{color:var(--red);font-weight:600}
 .msg-input-row{display:flex;gap:8px;padding:8px 12px 12px;align-items:flex-end}
-.msg-input{flex:1;background:var(--navy-mid);border:1px solid var(--border);border-radius:22px;padding:10px 16px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;resize:none;max-height:100px;outline:none;line-height:1.4}
+.msg-input{flex:1;background:var(--navy);border:1.5px solid var(--border);border-radius:22px;padding:10px 16px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;resize:none;max-height:100px;outline:none;line-height:1.4;transition:border-color .2s}
 .msg-input:focus{border-color:var(--teal)}
-.ivy-input:focus{border-color:var(--amber)}
-.send-btn{border:none;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:16px;font-weight:700}
+.ivy-input:focus{border-color:var(--amber)!important}
+.send-btn{border:none;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:16px;font-weight:700;transition:transform .1s,opacity .15s}
 .send-btn.mx-send{background:var(--teal);color:var(--navy)}
 .send-btn.ivy-send{background:var(--amber);color:var(--navy)}
-.send-btn:active{transform:scale(.9)}
+.send-btn:active{transform:scale(.88)}
+.empty{text-align:center;padding:50px 20px;color:var(--muted);font-size:13px}
 /* SETTINGS */
 .settings-card{background:var(--card);border:1px solid rgba(0,180,216,.2);border-radius:14px;overflow:hidden;margin-bottom:12px}
 .s-section{padding:14px;border-bottom:1px solid var(--border)}
@@ -128,6 +142,24 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--text);min
 /* IVY extras */
 .greeting{font-size:22px;font-weight:600;margin-bottom:4px}
 .subtitle{font-size:13px;color:var(--dim);margin-bottom:16px}
+/* VOYAGE CARD */
+.voyage-card{background:var(--navy-mid);border:1px solid rgba(0,180,216,.25);border-radius:16px;padding:18px;margin-bottom:16px;position:relative;overflow:hidden}
+.voyage-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--amber))}
+.voyage-label{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--teal);text-transform:uppercase;margin-bottom:14px}
+.voyage-route{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.voyage-port{flex:1}
+.voyage-port-name{font-size:15px;font-weight:600;color:var(--text)}
+.voyage-port-label{font-size:10px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
+.voyage-arrow{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0}
+.voyage-line{width:40px;height:1px;background:linear-gradient(90deg,var(--teal),var(--amber))}
+.voyage-ship{font-size:16px}
+.voyage-eta-row{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border)}
+.voyage-eta-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+.voyage-eta-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:var(--amber)}
+.voyage-countdown{font-size:11px;color:var(--teal);margin-top:2px}
+.voyage-note{font-size:12px;color:var(--dim);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-style:italic}
+.voyage-area{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);margin-bottom:10px}
+.voyage-area-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 6px var(--teal);animation:pulse 2s infinite;flex-shrink:0}
 /* MISC */
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--navy-light);border-radius:2px}
 .empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
@@ -234,11 +266,13 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--text);min
         <button class="s-btn" onclick="saveVessel()">Save</button>
       </div>
       <div class="s-section">
-        <div class="s-label">My location (for Ivy)</div>
-        <div class="f-row"><span class="f-lbl">Latitude</span><input class="f-inp" id="s-lat" type="number" step="0.01" placeholder="5.6"></div>
-        <div class="f-row"><span class="f-lbl">Longitude</span><input class="f-inp" id="s-lng" type="number" step="0.01" placeholder="-0.2"></div>
-        <div class="f-row"><span class="f-lbl">Area</span><input class="f-inp" id="s-area" placeholder="Gulf of Guinea"></div>
-        <button class="s-btn" onclick="saveLocation()">Update location</button>
+        <div class="s-label">Voyage info (shown to Ivy)</div>
+        <div class="f-row"><span class="f-lbl">Current area</span><input class="f-inp" id="s-area" placeholder="e.g. Gulf of Guinea"></div>
+        <div class="f-row"><span class="f-lbl">From</span><input class="f-inp" id="s-from" placeholder="e.g. Tema, Ghana"></div>
+        <div class="f-row"><span class="f-lbl">To</span><input class="f-inp" id="s-to" placeholder="e.g. Rotterdam, Netherlands"></div>
+        <div class="f-row"><span class="f-lbl">ETA</span><input class="f-inp" id="s-eta" type="date"></div>
+        <div class="f-row"><span class="f-lbl">Note</span><input class="f-inp" id="s-note" placeholder="e.g. Smooth sailing so far 🌊"></div>
+        <button class="s-btn" onclick="saveLocation()">Update for Ivy</button>
       </div>
     </div>
   </div>
@@ -248,6 +282,33 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--text);min
 <div class="view" id="view-ivy">
   <div class="greeting">Hi Ivy 👋</div>
   <div class="subtitle" id="ivy-subtitle">Maxwell is at sea</div>
+
+  <div class="voyage-card" id="voyage-card">
+    <div class="voyage-label">⚓ Current voyage</div>
+    <div class="voyage-area"><div class="voyage-area-dot"></div><span id="ivy-area">—</span></div>
+    <div class="voyage-route">
+      <div class="voyage-port">
+        <div class="voyage-port-name" id="ivy-from">—</div>
+        <div class="voyage-port-label">Departed</div>
+      </div>
+      <div class="voyage-arrow">
+        <div class="voyage-ship">🛳️</div>
+        <div class="voyage-line"></div>
+      </div>
+      <div class="voyage-port" style="text-align:right">
+        <div class="voyage-port-name" id="ivy-to">—</div>
+        <div class="voyage-port-label">Destination</div>
+      </div>
+    </div>
+    <div class="voyage-eta-row">
+      <div>
+        <div class="voyage-eta-label">Estimated arrival</div>
+        <div class="voyage-eta-val" id="ivy-eta">—</div>
+        <div class="voyage-countdown" id="ivy-countdown"></div>
+      </div>
+    </div>
+    <div class="voyage-note" id="ivy-note" style="display:none"></div>
+  </div>
 
   <div class="clock-strip">
     <div class="clock-card">
@@ -351,9 +412,11 @@ let state = {
   position: 'Third Officer',
   signonDate: '',
   signoffDate: '',
-  shipLat: 5.6,
-  shipLng: -0.2,
   shipArea: '',
+  voyageFrom: '',
+  voyageTo: '',
+  voyageEta: '',
+  voyageNote: '',
   messages: []
 };
 
@@ -481,27 +544,44 @@ function sendMsg(from) {
   inp.value = '';
   document.getElementById(urgId).checked = false;
 
-  const msg = { from, text, urgent, ts: Date.now(), read: false };
+  const msgId = 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  const msg = { id: msgId, from, text, urgent, ts: Date.now(), read: false };
   state.messages.push(msg);
   saveMessages();
   renderMessages();
 
-  // Also try Firebase
   if (db) {
     try {
-      db.collection('seabridge').doc('main').collection('messages')
-        .add({ from, text, urgent, ts: firebase.firestore.FieldValue.serverTimestamp(), read: false });
+      db.collection('seabridge').doc('main').collection('messages').doc(msgId)
+        .set({ id: msgId, from, text, urgent, ts: firebase.firestore.FieldValue.serverTimestamp(), read: false });
     } catch(e) {}
   }
 }
 
+// When a view is opened, mark incoming messages as read (delivered ✓✓)
+function markRead(viewer) {
+  let changed = false;
+  state.messages.forEach(msg => {
+    if (msg.from !== viewer && !msg.read) {
+      msg.read = true;
+      changed = true;
+      // Update in Firebase too
+      if (db && msg.id) {
+        try { db.collection('seabridge').doc('main').collection('messages').doc(msg.id).update({ read: true }); } catch(e) {}
+      }
+    }
+  });
+  if (changed) { saveMessages(); renderMessages(); }
+}
+
 function renderMessages() {
-  ['mx-msg-list', 'ivy-msg-list'].forEach(listId => {
+  // viewerRole: for mx-msg-list the viewer is maxwell, for ivy-msg-list viewer is ivy
+  [['mx-msg-list','maxwell'], ['ivy-msg-list','ivy']].forEach(([listId, viewer]) => {
     const el = document.getElementById(listId);
     if (!el) return;
     el.innerHTML = '';
     if (!state.messages.length) {
-      el.innerHTML = '<div class="empty">No messages yet<br><span style="font-size:11px;margin-top:4px;display:block">Send the first one ⚓</span></div>';
+      el.innerHTML = '<div class="empty">No messages yet<br><span style="font-size:11px;margin-top:4px;display:block">Say something ⚓</span></div>';
       return;
     }
     let lastDate = '';
@@ -512,26 +592,36 @@ function renderMessages() {
         el.innerHTML += '<div class="date-div">' + d + '</div>';
         lastDate = d;
       }
-      const isMx = msg.from === 'maxwell';
-      // From Maxwell's view: maxwell = out, ivy = inc
-      // From Ivy's view: ivy = out (ivy-out class), maxwell = inc (ivy-inc class)
-      let rowClass, whoLabel;
-      if (listId === 'mx-msg-list') {
-        rowClass = isMx ? 'out' : 'inc';
-        whoLabel = isMx ? 'Me' : 'Ivy';
-      } else {
-        rowClass = isMx ? 'inc ivy-inc' : 'out ivy-out';
-        whoLabel = isMx ? 'Maxwell' : 'Me';
-      }
+      const isFromMe = msg.from === viewer;
+      const isMxMsg = msg.from === 'maxwell';
+      // from-me = right side, from-other = left side
+      const groupClass = 'msg-group ' + (isFromMe ? 'from-me ' + (viewer === 'maxwell' ? 'is-maxwell' : 'is-ivy') : 'from-other');
       const urgLabel = msg.urgent ? '<div class="urg-lbl">🔴 Urgent</div>' : '';
-      const readTick = isMx && listId === 'mx-msg-list' ? ' <span class="tick">' + (msg.read ? '✓✓' : '✓') + '</span>' : '';
+      // Avatar for other side only
+      const otherAv = isFromMe ? '' :
+        '<div class="bubble-av ' + (isMxMsg ? 'mx-bav' : 'ivy-bav') + '">' + (isMxMsg ? '⚓' : '🌸') + '</div>';
+      // Checkmarks: ✓ sent, ✓✓ delivered (read)
+      let checks = '';
+      if (isFromMe) {
+        if (msg.read) {
+          checks = '<span class="meta-check delivered">✓✓</span>';
+        } else {
+          checks = '<span class="meta-check sent">✓</span>';
+        }
+      }
       el.innerHTML +=
-        '<div class="msg-row ' + rowClass + '">' +
-        '<div class="msg-who">' + whoLabel + '</div>' +
-        '<div class="bubble' + (msg.urgent ? ' urg' : '') + '">' + urgLabel + msg.text + '</div>' +
-        '<div class="msg-meta">' + tsStr(msg.ts) + readTick + '</div>' +
+        '<div class="' + groupClass + '">' +
+          '<div class="bubble-wrap">' +
+            otherAv +
+            '<div class="bubble' + (msg.urgent ? ' urg' : '') + '">' + urgLabel + msg.text + '</div>' +
+          '</div>' +
+          '<div class="msg-meta">' +
+            '<span class="meta-time">' + tsStr(msg.ts) + '</span>' +
+            checks +
+          '</div>' +
         '</div>';
-      if (msg.urgent && !msg.read && !isMx) urgentUnread = true;
+      // Urgent unread from other person
+      if (msg.urgent && !msg.read && msg.from !== viewer) urgentUnread = true;
     });
     el.scrollTop = el.scrollHeight;
     const badgeId = listId === 'mx-msg-list' ? 'mx-urg-badge' : 'ivy-urg-badge';
@@ -569,9 +659,11 @@ function loadSettings() {
       if (d.position) state.position = d.position;
       if (d.signonDate) state.signonDate = d.signonDate;
       if (d.signoffDate) state.signoffDate = d.signoffDate;
-      if (d.shipLat) state.shipLat = d.shipLat;
-      if (d.shipLng) state.shipLng = d.shipLng;
       if (d.shipArea) state.shipArea = d.shipArea;
+      if (d.voyageFrom !== undefined) state.voyageFrom = d.voyageFrom;
+      if (d.voyageTo !== undefined) state.voyageTo = d.voyageTo;
+      if (d.voyageEta !== undefined) state.voyageEta = d.voyageEta;
+      if (d.voyageNote !== undefined) state.voyageNote = d.voyageNote;
     }
   } catch(e) {}
 }
@@ -582,7 +674,7 @@ window.addEventListener('storage', function(e) {
     try { state.messages = JSON.parse(e.newValue) || []; renderMessages(); } catch(err) {}
   }
   if (e.key === 'sb_settings') {
-    loadSettings(); renderSchedule(); updateSubtitle(); fillSettingsFields();
+    loadSettings(); renderSchedule(); updateSubtitle(); fillSettingsFields(); renderVoyage();
   }
 });
 
@@ -622,17 +714,25 @@ function saveVessel() {
   if (db) db.collection('seabridge').doc('main').set({ vesselName: state.vesselName, position: state.position, signonDate: state.signonDate, signoffDate: state.signoffDate }, { merge: true }).catch(() => {});
 }
 function saveLocation() {
-  state.shipLat = parseFloat(document.getElementById('s-lat').value) || 5.6;
-  state.shipLng = parseFloat(document.getElementById('s-lng').value) || -0.2;
   state.shipArea = document.getElementById('s-area').value;
+  state.voyageFrom = document.getElementById('s-from').value;
+  state.voyageTo = document.getElementById('s-to').value;
+  state.voyageEta = document.getElementById('s-eta').value;
+  state.voyageNote = document.getElementById('s-note').value;
   saveSettings();
-  if (db) db.collection('seabridge').doc('main').set({ shipLat: state.shipLat, shipLng: state.shipLng, shipArea: state.shipArea }, { merge: true }).catch(() => {});
+  renderVoyage();
+  if (db) db.collection('seabridge').doc('main').set({
+    shipArea: state.shipArea, voyageFrom: state.voyageFrom,
+    voyageTo: state.voyageTo, voyageEta: state.voyageEta, voyageNote: state.voyageNote
+  }, { merge: true }).catch(() => {});
 }
 function fillSettingsFields() {
   const v = (id, val) => { const e = document.getElementById(id); if (e) e.value = val || ''; };
   v('s-vessel', state.vesselName); v('s-pos', state.position);
   v('s-on', state.signonDate); v('s-off', state.signoffDate);
-  v('s-lat', state.shipLat); v('s-lng', state.shipLng); v('s-area', state.shipArea);
+  v('s-area', state.shipArea);
+  v('s-from', state.voyageFrom); v('s-to', state.voyageTo);
+  v('s-eta', state.voyageEta); v('s-note', state.voyageNote);
 }
 function updateSubtitle() {
   const parts = [];
@@ -697,12 +797,14 @@ function mxTab(t) {
     document.querySelectorAll('#view-maxwell .tab')[i].classList.toggle('active', n === t);
     const p = document.getElementById('mx-pane-' + n); if (p) p.classList.toggle('active', n === t);
   });
+  if (t === 'messages') markRead('maxwell');
 }
 function ivyTab(t) {
   ['schedule', 'messages'].forEach((n, i) => {
     document.querySelectorAll('#view-ivy .tab')[i].classList.toggle('active', n === t);
     const p = document.getElementById('ivy-pane-' + n); if (p) p.classList.toggle('active', n === t);
   });
+  if (t === 'messages') markRead('ivy');
 }
 
 // ═══════════════════════════════════════════
@@ -722,22 +824,73 @@ function initFirebase() {
         if (d.tz !== undefined) state.tz = Number(d.tz);
         if (d.schedule && d.schedule.length) state.schedule = d.schedule;
         if (d.vesselName !== undefined) state.vesselName = d.vesselName;
-        if (d.shipLat) state.shipLat = d.shipLat;
-        if (d.shipLng) state.shipLng = d.shipLng;
         if (d.shipArea !== undefined) state.shipArea = d.shipArea;
+        if (d.voyageFrom !== undefined) state.voyageFrom = d.voyageFrom;
+        if (d.voyageTo !== undefined) state.voyageTo = d.voyageTo;
+        if (d.voyageEta !== undefined) state.voyageEta = d.voyageEta;
+        if (d.voyageNote !== undefined) state.voyageNote = d.voyageNote;
         saveSettings();
-        renderSchedule(); updateSubtitle(); fillSettingsFields(); buildTzSelect();
+        renderSchedule(); updateSubtitle(); fillSettingsFields(); buildTzSelect(); renderVoyage();
       }
     }, () => {});
-    // Listen to messages
+    // Listen to messages — real-time cross-device sync
     db.collection('seabridge').doc('main').collection('messages')
       .orderBy('ts').onSnapshot(snap => {
         state.messages = [];
-        snap.forEach(doc => state.messages.push({ id: doc.id, ...doc.data() }));
+        snap.forEach(doc => {
+          const d = doc.data();
+          const ts = d.ts && d.ts.seconds ? d.ts.seconds * 1000 : (d.ts || Date.now());
+          state.messages.push({ id: doc.id, from: d.from, text: d.text, urgent: d.urgent||false, ts, read: d.read||false });
+        });
         saveMessages();
         renderMessages();
       }, () => {});
   } catch(e) { console.warn('Firebase init failed:', e.message); }
+}
+
+// ═══════════════════════════════════════════
+// VOYAGE CARD
+// ═══════════════════════════════════════════
+function renderVoyage() {
+  const card = document.getElementById('voyage-card');
+  if (!card) return;
+
+  const hasData = state.voyageFrom || state.voyageTo || state.shipArea;
+  card.style.display = hasData ? 'block' : 'none';
+
+  setText('ivy-from', state.voyageFrom || '—');
+  setText('ivy-to', state.voyageTo || '—');
+  setText('ivy-area', state.shipArea || '—');
+
+  const etaEl = document.getElementById('ivy-eta');
+  const countEl = document.getElementById('ivy-countdown');
+  const noteEl = document.getElementById('ivy-note');
+
+  if (state.voyageEta && etaEl) {
+    const eta = new Date(state.voyageEta);
+    etaEl.textContent = DAYS[eta.getDay()] + ' ' + eta.getDate() + ' ' + MONTHS[eta.getMonth()] + ' ' + eta.getFullYear();
+    const now = new Date();
+    const diff = eta - now;
+    if (diff > 0) {
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hrs = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      countEl.textContent = days > 0 ? days + ' day' + (days !== 1 ? 's' : '') + ' ' + hrs + 'h away' : hrs + ' hours away';
+    } else {
+      countEl.textContent = 'Arrived ✓';
+    }
+  } else if (etaEl) {
+    etaEl.textContent = '—';
+    if (countEl) countEl.textContent = '';
+  }
+
+  if (noteEl) {
+    if (state.voyageNote) {
+      noteEl.textContent = '💬 ' + state.voyageNote;
+      noteEl.style.display = 'block';
+    } else {
+      noteEl.style.display = 'none';
+    }
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -750,8 +903,10 @@ fillSettingsFields();
 updateSubtitle();
 renderSchedule();
 renderMessages();
+renderVoyage();
 tick();
 setInterval(tick, 1000);
+setInterval(renderVoyage, 60000); // update ETA countdown every minute
 
 // Load Firebase in background
 (function() {

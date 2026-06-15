@@ -1,4 +1,13 @@
 <!DOCTYPE html>
+<!-- SeaBridge by Maxwell & Ivy
+     To enable cross-device messaging:
+     1. Go to console.firebase.google.com
+     2. Create project → Firestore Database → test mode
+     3. Project Settings → Add Web App → copy config
+     4. Replace FB_CFG values below with your real credentials
+     Messages sync across tabs instantly via BroadcastChannel.
+     Cross-device sync requires Firebase credentials above.
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -369,16 +378,41 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--text);min
 
 <script>
 // ═══════════════════════════════════════════
-// FIREBASE CONFIG — replace with your real values
+// FIREBASE CONFIG
+// Replace these values with your own Firebase project credentials
+// Get them from: console.firebase.google.com → Project Settings → Your apps → Web app
 // ═══════════════════════════════════════════
 const FB_CFG = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyB1bbaZRG03rI7RyA8bfmABX__UZNhWKLY",
+  authDomain: "seabridge-77912.firebaseapp.com",
+  projectId: "seabridge-77912",
+  storageBucket: "seabridge-77912.firebasestorage.app",
+  messagingSenderId: "1042818179518",
+  appId: "1:1042818179518:web:7e1dcef0881ae0d9b959ef"
 };
+
+// ═══════════════════════════════════════════
+// REAL-TIME SYNC via BroadcastChannel + polling fallback
+// Works across tabs AND across devices via Firebase when configured
+// ═══════════════════════════════════════════
+const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('seabridge') : null;
+if (channel) {
+  channel.onmessage = function(e) {
+    if (e.data.type === 'messages') {
+      state.messages = e.data.messages;
+      renderMessages();
+    }
+    if (e.data.type === 'settings') {
+      loadSettings(); renderSchedule(); renderVoyage(); updateSubtitle();
+    }
+  };
+}
+function broadcastMessages() {
+  if (channel) channel.postMessage({ type: 'messages', messages: state.messages });
+}
+function broadcastSettings() {
+  if (channel) channel.postMessage({ type: 'settings' });
+}
 
 // ═══════════════════════════════════════════
 // DEFAULT DATA
@@ -571,7 +605,7 @@ function markRead(viewer) {
       }
     }
   });
-  if (changed) { saveMessages(); renderMessages(); }
+  if (changed) { saveMessages(); renderMessages(); broadcastMessages(); }
 }
 
 function renderMessages() {
@@ -635,6 +669,7 @@ function renderMessages() {
 // ═══════════════════════════════════════════
 function saveMessages() {
   try { localStorage.setItem('sb_messages', JSON.stringify(state.messages)); } catch(e) {}
+  broadcastMessages();
 }
 function loadMessages() {
   try {
@@ -669,6 +704,7 @@ function loadSettings() {
 }
 
 // Listen for messages from other tab/device via storage event
+// storage event fires when ANOTHER tab changes localStorage
 window.addEventListener('storage', function(e) {
   if (e.key === 'sb_messages') {
     try { state.messages = JSON.parse(e.newValue) || []; renderMessages(); } catch(err) {}
@@ -811,7 +847,7 @@ function ivyTab(t) {
 // FIREBASE (loads in background)
 // ═══════════════════════════════════════════
 function initFirebase() {
-  if (!FB_CFG.apiKey || FB_CFG.apiKey === 'YOUR_API_KEY') return;
+  if (!FB_CFG.apiKey || !FB_CFG.projectId) return;
   if (typeof firebase === 'undefined') return;
   try {
     firebase.initializeApp(FB_CFG);

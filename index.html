@@ -4,46 +4,769 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>SeaBridge</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+:root{--navy:#0a1628;--navy-mid:#112240;--navy-light:#1a3358;--teal:#00b4d8;--amber:#f4a261;--green:#2dc653;--red:#e63946;--text:#e8eaf0;--dim:#8899aa;--muted:#4a5568;--border:rgba(0,180,216,0.15);--card:rgba(17,34,64,0.8)}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:#0a1628;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
-.logo{font-size:28px;font-weight:600;color:#00b4d8;letter-spacing:.05em;margin-bottom:6px}
-.logo span{color:#8899aa;font-weight:300}
-.tagline{font-size:13px;color:#4a5568;margin-bottom:48px}
-.btn{display:flex;align-items:center;gap:14px;width:100%;max-width:300px;padding:18px 20px;border-radius:16px;border:1px solid;text-decoration:none;margin-bottom:14px;transition:transform .15s,opacity .15s}
-.btn:active{transform:scale(.97);opacity:.85}
-.btn-maxwell{background:rgba(0,180,216,.08);border-color:rgba(0,180,216,.3)}
-.btn-ivy{background:rgba(244,162,97,.08);border-color:rgba(244,162,97,.3)}
-.btn-icon{font-size:28px;flex-shrink:0}
-.btn-text{}
-.btn-name{font-size:16px;font-weight:600}
-.btn-maxwell .btn-name{color:#00b4d8}
-.btn-ivy .btn-name{color:#f4a261}
-.btn-sub{font-size:11px;color:#4a5568;margin-top:2px}
-.footer{font-size:11px;color:#2a3548;margin-top:40px;text-align:center}
+body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;font-size:14px}
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--navy-mid);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo{font-size:16px;font-weight:600;color:var(--teal);letter-spacing:.05em}
+.logo span{color:var(--dim);font-weight:300}
+.role-switch{display:flex;background:var(--navy);border:1px solid var(--border);border-radius:20px;padding:3px;gap:2px}
+.role-btn{padding:5px 14px;border-radius:16px;border:none;background:transparent;color:var(--dim);font-size:12px;font-family:'Inter',sans-serif;font-weight:500;cursor:pointer;transition:all .2s}
+.role-btn.mx.active{background:var(--teal);color:var(--navy)}
+.role-btn.ivy.active{background:var(--amber);color:var(--navy)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* CONTENT */
+.view{display:none;padding:16px;max-width:480px;margin:0 auto}
+.view.active{display:block}
+/* CLOCKS */
+.clock-strip{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.clock-card{background:var(--card);border:1px solid rgba(0,180,216,.2);border-radius:12px;padding:14px}
+.clabel{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-bottom:4px}
+.ctime{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:500;color:var(--teal);letter-spacing:.02em}
+.cdate{font-size:11px;color:var(--dim);margin-top:2px}
+.ctz{font-size:10px;color:var(--muted);margin-top:3px}
+/* NOW CARD */
+.now-card{background:var(--navy-mid);border:1px solid var(--teal);border-radius:14px;padding:16px;margin-bottom:16px;position:relative;overflow:hidden}
+.now-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--teal)}
+.now-label{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--teal);text-transform:uppercase;margin-bottom:8px}
+.now-name{font-size:20px;font-weight:600;color:var(--text);margin-bottom:4px}
+.now-time{font-size:12px;color:var(--dim)}
+.progress{height:3px;background:rgba(0,180,216,.15);border-radius:2px;margin-top:12px}
+.progress-fill{height:100%;background:var(--teal);border-radius:2px;transition:width 1s linear}
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:500;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+.pane{display:none}.pane.active{display:block}
+/* SCHEDULE */
+.sec-title{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-bottom:10px}
+.sched-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;margin-bottom:5px;border:1px solid transparent}
+.sched-item.active{background:rgba(0,180,216,.08);border-color:rgba(0,180,216,.3)}
+.sched-item.past{opacity:.45}
+.stime{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);min-width:86px}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sdot.active{background:var(--teal);box-shadow:0 0 6px var(--teal)}
+.sdot.past{background:var(--muted)}
+.sdot.upcoming{background:var(--navy-light);border:1.5px solid var(--muted)}
+.sname{font-size:13px;font-weight:500;color:var(--text);flex:1}
+/* MESSAGES */
+.msg-panel{border-radius:16px;overflow:hidden;background:var(--navy-mid);border:1px solid rgba(0,180,216,.2)}
+.msg-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);background:var(--navy)}
+.msg-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.msg-avatar.ivy-av{background:rgba(244,162,97,.15);border:1.5px solid var(--amber)}
+.msg-avatar.mx-av{background:rgba(0,180,216,.15);border:1.5px solid var(--teal)}
+.msg-info{flex:1}
+.msg-name{font-size:13px;font-weight:600;color:var(--text)}
+.msg-status{font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px;margin-top:1px}
+.msg-status::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block}
+.urg-badge{background:rgba(230,57,70,.2);color:var(--red);font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid rgba(230,57,70,.3);display:none;animation:urgp 1.5s infinite}
+.urg-badge.on{display:inline-flex}
+@keyframes urgp{0%,100%{opacity:1}50%{opacity:.4}}
+.msg-list{padding:14px 12px;height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.msg-row{display:flex;flex-direction:column}
+.msg-row.out{align-items:flex-end}
+.msg-row.inc{align-items:flex-start}
+.msg-who{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;padding:0 4px}
+.msg-row.out .msg-who{color:var(--teal)}
+.msg-row.out.ivy-out .msg-who{color:var(--amber)}
+.msg-row.inc .msg-who{color:var(--amber)}
+.msg-row.inc.ivy-inc .msg-who{color:var(--teal)}
+.bubble{max-width:82%;padding:10px 14px;font-size:13px;line-height:1.5;word-break:break-word}
+.msg-row.out .bubble{background:var(--teal);color:var(--navy);border-radius:16px 16px 4px 16px;font-weight:500}
+.msg-row.out.ivy-out .bubble{background:var(--amber);color:var(--navy);border-radius:16px 16px 4px 16px;font-weight:500}
+.msg-row.inc .bubble{background:var(--navy-light);color:var(--text);border-radius:16px 16px 16px 4px;border:1px solid var(--border)}
+.bubble.urg{box-shadow:0 0 0 2px var(--red)}
+.urg-lbl{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--red);margin-bottom:4px;letter-spacing:.08em}
+.msg-meta{font-size:10px;color:var(--muted);margin-top:3px;padding:0 4px}
+.msg-row.out .msg-meta{text-align:right;color:var(--dim)}
+.tick{color:var(--teal);font-size:11px}
+.date-div{text-align:center;font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:4px 0 8px;display:flex;align-items:center;gap:8px}
+.date-div::before,.date-div::after{content:'';flex:1;height:1px;background:var(--border)}
+.msg-foot{border-top:1px solid var(--border);background:var(--navy)}
+.urg-row{display:flex;align-items:center;gap:7px;padding:8px 14px 0;cursor:pointer}
+.urg-row input{cursor:pointer;accent-color:var(--red);width:13px;height:13px}
+.urg-row label{font-size:11px;color:var(--dim);cursor:pointer}
+.urg-row label span{color:var(--red);font-weight:600}
+.msg-input-row{display:flex;gap:8px;padding:8px 12px 12px;align-items:flex-end}
+.msg-input{flex:1;background:var(--navy-mid);border:1px solid var(--border);border-radius:22px;padding:10px 16px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;resize:none;max-height:100px;outline:none;line-height:1.4}
+.msg-input:focus{border-color:var(--teal)}
+.ivy-input:focus{border-color:var(--amber)}
+.send-btn{border:none;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:16px;font-weight:700}
+.send-btn.mx-send{background:var(--teal);color:var(--navy)}
+.send-btn.ivy-send{background:var(--amber);color:var(--navy)}
+.send-btn:active{transform:scale(.9)}
+/* SETTINGS */
+.settings-card{background:var(--card);border:1px solid rgba(0,180,216,.2);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.s-section{padding:14px;border-bottom:1px solid var(--border)}
+.s-section:last-child{border-bottom:none}
+.s-label{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-bottom:10px}
+.f-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.f-lbl{font-size:12px;color:var(--dim);min-width:72px}
+.f-inp{flex:1;background:var(--navy);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;outline:none}
+.f-inp:focus{border-color:var(--teal)}
+.f-sel{flex:1;background:var(--navy);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;outline:none}
+.s-btn{background:var(--teal);color:var(--navy);border:none;border-radius:8px;padding:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;width:100%;margin-top:6px}
+.d-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--teal);font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;width:100%}
+/* EDIT MODAL */
+.modal{position:fixed;inset:0;background:rgba(10,22,40,.97);z-index:200;display:none;flex-direction:column;padding:20px 16px;overflow-y:auto}
+.modal.open{display:flex}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-size:16px;font-weight:600;color:var(--teal)}
+.x-btn{background:none;border:none;color:var(--dim);font-size:26px;cursor:pointer;line-height:1}
+.edit-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}
+.edit-fields{display:grid;grid-template-columns:74px 74px 1fr;gap:8px;margin-bottom:8px}
+.m-inp{background:var(--navy);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;width:100%}
+.m-inp:focus{border-color:var(--teal)}
+.e-sel{background:var(--navy);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;outline:none;width:80px}
+.del-btn{background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.3);border-radius:6px;padding:5px 10px;color:var(--red);font-size:11px;cursor:pointer}
+.add-row-btn{background:rgba(0,180,216,.1);border:1px dashed var(--teal);border-radius:10px;padding:10px;color:var(--teal);font-size:13px;cursor:pointer;width:100%;text-align:center;margin-top:4px}
+.save-modal-btn{background:var(--teal);color:var(--navy);border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;width:100%;margin-top:14px}
+/* IVY extras */
+.greeting{font-size:22px;font-weight:600;margin-bottom:4px}
+.subtitle{font-size:13px;color:var(--dim);margin-bottom:16px}
+/* MISC */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--navy-light);border-radius:2px}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
 </style>
 </head>
 <body>
-<div class="logo">Sea<span>Bridge</span></div>
-<div class="tagline">Who are you?</div>
 
-<a class="btn btn-maxwell" href="maxwell.html">
-  <div class="btn-icon">⚓</div>
-  <div class="btn-text">
-    <div class="btn-name">Maxwell</div>
-    <div class="btn-sub">Full access · Edit & manage</div>
+<div class="topbar">
+  <div class="logo">Sea<span>Bridge</span></div>
+  <div class="role-switch">
+    <button class="role-btn mx active" id="btn-mx" onclick="setRole('maxwell')">⚓ Maxwell</button>
+    <button class="role-btn ivy" id="btn-ivy" onclick="setRole('ivy')">🌸 Ivy</button>
   </div>
-</a>
+  <div class="dot"></div>
+</div>
 
-<a class="btn btn-ivy" href="ivy.html">
-  <div class="btn-icon">🌸</div>
-  <div class="btn-text">
-    <div class="btn-name">Ivy</div>
-    <div class="btn-sub">View Maxwell's schedule & chat</div>
+<!-- EDIT MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-head">
+    <div class="modal-title">Edit schedule</div>
+    <button class="x-btn" onclick="closeModal()">×</button>
   </div>
-</a>
+  <div id="modalRows"></div>
+  <button class="add-row-btn" onclick="addRow()">+ Add activity</button>
+  <button class="save-modal-btn" onclick="saveModal()">Save schedule</button>
+</div>
 
-<div class="footer">SeaBridge · Keeping you connected at sea</div>
+<!-- MAXWELL VIEW -->
+<div class="view active" id="view-maxwell">
+  <div class="clock-strip">
+    <div class="clock-card">
+      <div class="clabel">My time</div>
+      <div class="ctime" id="mx-time">00:00</div>
+      <div class="cdate" id="mx-date">---</div>
+      <div class="ctz" id="mx-tz">GMT+0</div>
+    </div>
+    <div class="clock-card">
+      <div class="clabel">Ivy · Ghana</div>
+      <div class="ctime" id="mx-ivy-time">00:00</div>
+      <div class="cdate" id="mx-ivy-date">---</div>
+      <div class="ctz">GMT+0</div>
+    </div>
+  </div>
+
+  <div class="now-card">
+    <div class="now-label">▶ Now</div>
+    <div class="now-name" id="mx-act-name">—</div>
+    <div class="now-time" id="mx-act-time"></div>
+    <div class="progress"><div class="progress-fill" id="mx-act-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="mxTab('schedule')">Schedule</div>
+    <div class="tab" onclick="mxTab('messages')">Messages</div>
+    <div class="tab" onclick="mxTab('settings')">Settings</div>
+  </div>
+
+  <div class="pane active" id="mx-pane-schedule">
+    <div class="sec-title">Daily watches & duties</div>
+    <div id="mx-sched-list"></div>
+    <button class="d-btn" style="margin-top:8px" onclick="openModal()">✏️ Edit schedule</button>
+  </div>
+
+  <div class="pane" id="mx-pane-messages">
+    <div class="msg-panel">
+      <div class="msg-head">
+        <div class="msg-avatar ivy-av">🌸</div>
+        <div class="msg-info">
+          <div class="msg-name">Ivy <span class="urg-badge" id="mx-urg-badge">🔴 Urgent</span></div>
+          <div class="msg-status">Ghana · Connected</div>
+        </div>
+      </div>
+      <div class="msg-list" id="mx-msg-list"></div>
+      <div class="msg-foot">
+        <div class="urg-row">
+          <input type="checkbox" id="mx-urg">
+          <label for="mx-urg">Mark as <span>🔴 urgent</span></label>
+        </div>
+        <div class="msg-input-row">
+          <textarea class="msg-input" id="mx-msg-inp" placeholder="Message Ivy..." rows="1"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg('maxwell')}"></textarea>
+          <button class="send-btn mx-send" onclick="sendMsg('maxwell')">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pane" id="mx-pane-settings">
+    <div class="settings-card">
+      <div class="s-section">
+        <div class="s-label">My timezone</div>
+        <div class="f-row">
+          <span class="f-lbl">GMT offset</span>
+          <select class="f-sel" id="tz-sel" onchange="saveTz()"></select>
+        </div>
+        <button class="d-btn" onclick="detectTz()">📍 Auto-detect from device</button>
+      </div>
+      <div class="s-section">
+        <div class="s-label">Vessel & contract</div>
+        <div class="f-row"><span class="f-lbl">Vessel</span><input class="f-inp" id="s-vessel" placeholder="MV Example"></div>
+        <div class="f-row"><span class="f-lbl">Position</span><input class="f-inp" id="s-pos" placeholder="Third Officer"></div>
+        <div class="f-row"><span class="f-lbl">Sign-on</span><input class="f-inp" id="s-on" type="date"></div>
+        <div class="f-row"><span class="f-lbl">Sign-off</span><input class="f-inp" id="s-off" type="date"></div>
+        <button class="s-btn" onclick="saveVessel()">Save</button>
+      </div>
+      <div class="s-section">
+        <div class="s-label">My location (for Ivy)</div>
+        <div class="f-row"><span class="f-lbl">Latitude</span><input class="f-inp" id="s-lat" type="number" step="0.01" placeholder="5.6"></div>
+        <div class="f-row"><span class="f-lbl">Longitude</span><input class="f-inp" id="s-lng" type="number" step="0.01" placeholder="-0.2"></div>
+        <div class="f-row"><span class="f-lbl">Area</span><input class="f-inp" id="s-area" placeholder="Gulf of Guinea"></div>
+        <button class="s-btn" onclick="saveLocation()">Update location</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- IVY VIEW -->
+<div class="view" id="view-ivy">
+  <div class="greeting">Hi Ivy 👋</div>
+  <div class="subtitle" id="ivy-subtitle">Maxwell is at sea</div>
+
+  <div class="clock-strip">
+    <div class="clock-card">
+      <div class="clabel">Your time</div>
+      <div class="ctime" id="ivy-time">00:00</div>
+      <div class="cdate" id="ivy-date">---</div>
+      <div class="ctz">Ghana · GMT+0</div>
+    </div>
+    <div class="clock-card">
+      <div class="clabel">Maxwell's time</div>
+      <div class="ctime" id="ivy-mx-time">00:00</div>
+      <div class="cdate" id="ivy-mx-date">---</div>
+      <div class="ctz" id="ivy-mx-tz">GMT+0</div>
+    </div>
+  </div>
+
+  <div class="now-card">
+    <div class="now-label">📡 Maxwell is currently</div>
+    <div class="now-name" id="ivy-act-name">—</div>
+    <div class="now-time" id="ivy-act-time"></div>
+    <div class="progress"><div class="progress-fill" id="ivy-act-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="ivyTab('schedule')">Schedule</div>
+    <div class="tab" onclick="ivyTab('messages')">Messages</div>
+  </div>
+
+  <div class="pane active" id="ivy-pane-schedule">
+    <div class="sec-title">Maxwell's day at sea</div>
+    <div id="ivy-sched-list"></div>
+  </div>
+
+  <div class="pane" id="ivy-pane-messages">
+    <div class="msg-panel">
+      <div class="msg-head">
+        <div class="msg-avatar mx-av">⚓</div>
+        <div class="msg-info">
+          <div class="msg-name">Maxwell <span class="urg-badge" id="ivy-urg-badge">🔴 Urgent</span></div>
+          <div class="msg-status">At sea · Connected</div>
+        </div>
+      </div>
+      <div class="msg-list" id="ivy-msg-list"></div>
+      <div class="msg-foot">
+        <div class="urg-row">
+          <input type="checkbox" id="ivy-urg">
+          <label for="ivy-urg">Mark as <span>🔴 urgent</span></label>
+        </div>
+        <div class="msg-input-row">
+          <textarea class="msg-input ivy-input" id="ivy-msg-inp" placeholder="Message Maxwell..." rows="1"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg('ivy')}"></textarea>
+          <button class="send-btn ivy-send" onclick="sendMsg('ivy')">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// FIREBASE CONFIG — replace with your real values
+// ═══════════════════════════════════════════
+const FB_CFG = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+// ═══════════════════════════════════════════
+// DEFAULT DATA
+// ═══════════════════════════════════════════
+const DEFAULT_SCHED = [
+  {start:"07:00",end:"08:00",name:"Gym & prepare for watch",emoji:"💪"},
+  {start:"08:00",end:"12:00",name:"Bridge watch",emoji:"🧭"},
+  {start:"12:00",end:"13:00",name:"Lunch",emoji:"🍽️"},
+  {start:"13:00",end:"15:00",name:"Deck maintenance",emoji:"⚓"},
+  {start:"15:00",end:"18:00",name:"Shower & rest",emoji:"😴"},
+  {start:"18:00",end:"19:00",name:"Change chief & dinner",emoji:"🍽️"},
+  {start:"19:00",end:"20:00",name:"Free time",emoji:"☕"},
+  {start:"20:00",end:"00:00",name:"Night watch",emoji:"🌙"},
+  {start:"00:00",end:"07:00",name:"Sleep",emoji:"💤"}
+];
+
+const EMOJIS = ['🧭','⚓','💪','😴','🌙','💤','🍽️','📋','🔧','📡','📝','☕','🔭','🛳️'];
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let db = null;
+let role = 'maxwell';
+let tempSched = [];
+let state = {
+  tz: 0,
+  schedule: JSON.parse(JSON.stringify(DEFAULT_SCHED)),
+  vesselName: '',
+  position: 'Third Officer',
+  signonDate: '',
+  signoffDate: '',
+  shipLat: 5.6,
+  shipLng: -0.2,
+  shipArea: '',
+  messages: []
+};
+
+// ═══════════════════════════════════════════
+// TIME HELPERS — no locale functions, pure manual
+// ═══════════════════════════════════════════
+function getTime(offsetHrs) {
+  const n = new Date();
+  return new Date(n.getTime() + n.getTimezoneOffset() * 60000 + offsetHrs * 3600000);
+}
+function hhmm(d) {
+  const h = d.getHours(), m = d.getMinutes();
+  return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+}
+function dayStr(d) {
+  return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
+}
+function tsStr(ts) {
+  const d = new Date(typeof ts === 'number' ? ts : (ts && ts.seconds ? ts.seconds * 1000 : Date.now()));
+  return hhmm(d);
+}
+function dateStr(ts) {
+  const d = new Date(typeof ts === 'number' ? ts : (ts && ts.seconds ? ts.seconds * 1000 : Date.now()));
+  return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
+}
+
+// ═══════════════════════════════════════════
+// CLOCKS — tick every second
+// ═══════════════════════════════════════════
+function tick() {
+  const mt = getTime(state.tz);
+  const gt = getTime(0);
+  const tzLabel = 'GMT' + (state.tz >= 0 ? '+' : '') + state.tz;
+
+  // Maxwell view
+  setText('mx-time', hhmm(mt));
+  setText('mx-date', dayStr(mt));
+  setText('mx-tz', tzLabel);
+  setText('mx-ivy-time', hhmm(gt));
+  setText('mx-ivy-date', dayStr(gt));
+
+  // Ivy view
+  setText('ivy-time', hhmm(gt));
+  setText('ivy-date', dayStr(gt));
+  setText('ivy-mx-time', hhmm(mt));
+  setText('ivy-mx-date', dayStr(mt));
+  setText('ivy-mx-tz', tzLabel);
+
+  updateNow(mt);
+}
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+// ═══════════════════════════════════════════
+// SCHEDULE LOGIC
+// ═══════════════════════════════════════════
+function toMin(t) {
+  const parts = t.split(':');
+  return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+}
+function getActStatus(act, mt) {
+  const now = mt.getHours() * 60 + mt.getMinutes();
+  let s = toMin(act.start), e = toMin(act.end);
+  if (e <= s) e += 1440;
+  let c = now; if (c < s) c += 1440;
+  if (c >= s && c < e) return { status: 'active', progress: (c - s) / (e - s) * 100, left: e - c };
+  if (c >= e) return { status: 'past', progress: 100, left: 0 };
+  return { status: 'upcoming', progress: 0, left: e - c };
+}
+function getCurrentAct(mt) {
+  const sched = state.schedule.length ? state.schedule : DEFAULT_SCHED;
+  for (const a of sched) {
+    const r = getActStatus(a, mt);
+    if (r.status === 'active') return { ...a, ...r };
+  }
+  return null;
+}
+function updateNow(mt) {
+  const a = getCurrentAct(mt);
+  if (a) {
+    setText('mx-act-name', a.emoji + ' ' + a.name);
+    setText('mx-act-time', a.start + ' – ' + a.end + ' · ' + Math.round(a.left) + 'min left');
+    const f = document.getElementById('mx-act-fill'); if (f) f.style.width = a.progress + '%';
+    setText('ivy-act-name', a.emoji + ' ' + a.name);
+    setText('ivy-act-time', a.start + ' – ' + a.end + ' · ' + Math.round(a.left) + 'min left');
+    const f2 = document.getElementById('ivy-act-fill'); if (f2) f2.style.width = a.progress + '%';
+  } else {
+    setText('mx-act-name', '— Off watch'); setText('mx-act-time', '');
+    setText('ivy-act-name', '— Off watch'); setText('ivy-act-time', '');
+  }
+}
+function renderSchedule() {
+  const mt = getTime(state.tz);
+  const sched = state.schedule.length ? state.schedule : DEFAULT_SCHED;
+  ['mx-sched-list', 'ivy-sched-list'].forEach(listId => {
+    const el = document.getElementById(listId);
+    if (!el) return;
+    el.innerHTML = '';
+    sched.forEach(a => {
+      const r = getActStatus(a, mt);
+      const div = document.createElement('div');
+      div.className = 'sched-item ' + r.status;
+      div.innerHTML =
+        '<div class="stime">' + a.start + ' – ' + a.end + '</div>' +
+        '<div class="sdot ' + r.status + '"></div>' +
+        '<div class="sname">' + a.emoji + ' ' + a.name + '</div>';
+      el.appendChild(div);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════
+// MESSAGES
+// ═══════════════════════════════════════════
+function sendMsg(from) {
+  const inputId = from === 'maxwell' ? 'mx-msg-inp' : 'ivy-msg-inp';
+  const urgId = from === 'maxwell' ? 'mx-urg' : 'ivy-urg';
+  const inp = document.getElementById(inputId);
+  const text = inp.value.trim();
+  if (!text) return;
+  const urgent = document.getElementById(urgId).checked;
+  inp.value = '';
+  document.getElementById(urgId).checked = false;
+
+  const msg = { from, text, urgent, ts: Date.now(), read: false };
+  state.messages.push(msg);
+  saveMessages();
+  renderMessages();
+
+  // Also try Firebase
+  if (db) {
+    try {
+      db.collection('seabridge').doc('main').collection('messages')
+        .add({ from, text, urgent, ts: firebase.firestore.FieldValue.serverTimestamp(), read: false });
+    } catch(e) {}
+  }
+}
+
+function renderMessages() {
+  ['mx-msg-list', 'ivy-msg-list'].forEach(listId => {
+    const el = document.getElementById(listId);
+    if (!el) return;
+    el.innerHTML = '';
+    if (!state.messages.length) {
+      el.innerHTML = '<div class="empty">No messages yet<br><span style="font-size:11px;margin-top:4px;display:block">Send the first one ⚓</span></div>';
+      return;
+    }
+    let lastDate = '';
+    let urgentUnread = false;
+    state.messages.forEach(msg => {
+      const d = dateStr(msg.ts);
+      if (d !== lastDate) {
+        el.innerHTML += '<div class="date-div">' + d + '</div>';
+        lastDate = d;
+      }
+      const isMx = msg.from === 'maxwell';
+      // From Maxwell's view: maxwell = out, ivy = inc
+      // From Ivy's view: ivy = out (ivy-out class), maxwell = inc (ivy-inc class)
+      let rowClass, whoLabel;
+      if (listId === 'mx-msg-list') {
+        rowClass = isMx ? 'out' : 'inc';
+        whoLabel = isMx ? 'Me' : 'Ivy';
+      } else {
+        rowClass = isMx ? 'inc ivy-inc' : 'out ivy-out';
+        whoLabel = isMx ? 'Maxwell' : 'Me';
+      }
+      const urgLabel = msg.urgent ? '<div class="urg-lbl">🔴 Urgent</div>' : '';
+      const readTick = isMx && listId === 'mx-msg-list' ? ' <span class="tick">' + (msg.read ? '✓✓' : '✓') + '</span>' : '';
+      el.innerHTML +=
+        '<div class="msg-row ' + rowClass + '">' +
+        '<div class="msg-who">' + whoLabel + '</div>' +
+        '<div class="bubble' + (msg.urgent ? ' urg' : '') + '">' + urgLabel + msg.text + '</div>' +
+        '<div class="msg-meta">' + tsStr(msg.ts) + readTick + '</div>' +
+        '</div>';
+      if (msg.urgent && !msg.read && !isMx) urgentUnread = true;
+    });
+    el.scrollTop = el.scrollHeight;
+    const badgeId = listId === 'mx-msg-list' ? 'mx-urg-badge' : 'ivy-urg-badge';
+    const badge = document.getElementById(badgeId);
+    if (badge) badge.classList.toggle('on', urgentUnread);
+  });
+}
+
+// ═══════════════════════════════════════════
+// STORAGE — messages shared, settings separate
+// ═══════════════════════════════════════════
+function saveMessages() {
+  try { localStorage.setItem('sb_messages', JSON.stringify(state.messages)); } catch(e) {}
+}
+function loadMessages() {
+  try {
+    const s = localStorage.getItem('sb_messages');
+    if (s) state.messages = JSON.parse(s);
+  } catch(e) {}
+}
+function saveSettings() {
+  try {
+    const s = { tz: state.tz, schedule: state.schedule, vesselName: state.vesselName, position: state.position, signonDate: state.signonDate, signoffDate: state.signoffDate, shipLat: state.shipLat, shipLng: state.shipLng, shipArea: state.shipArea };
+    localStorage.setItem('sb_settings', JSON.stringify(s));
+  } catch(e) {}
+}
+function loadSettings() {
+  try {
+    const s = localStorage.getItem('sb_settings');
+    if (s) {
+      const d = JSON.parse(s);
+      if (d.tz !== undefined) state.tz = d.tz;
+      if (d.schedule && d.schedule.length) state.schedule = d.schedule;
+      if (d.vesselName !== undefined) state.vesselName = d.vesselName;
+      if (d.position) state.position = d.position;
+      if (d.signonDate) state.signonDate = d.signonDate;
+      if (d.signoffDate) state.signoffDate = d.signoffDate;
+      if (d.shipLat) state.shipLat = d.shipLat;
+      if (d.shipLng) state.shipLng = d.shipLng;
+      if (d.shipArea) state.shipArea = d.shipArea;
+    }
+  } catch(e) {}
+}
+
+// Listen for messages from other tab/device via storage event
+window.addEventListener('storage', function(e) {
+  if (e.key === 'sb_messages') {
+    try { state.messages = JSON.parse(e.newValue) || []; renderMessages(); } catch(err) {}
+  }
+  if (e.key === 'sb_settings') {
+    loadSettings(); renderSchedule(); updateSubtitle(); fillSettingsFields();
+  }
+});
+
+// ═══════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════
+function buildTzSelect() {
+  const sel = document.getElementById('tz-sel');
+  if (!sel) return;
+  sel.innerHTML = '';
+  for (let h = -12; h <= 14; h++) {
+    const o = document.createElement('option');
+    o.value = h;
+    o.textContent = 'GMT' + (h >= 0 ? '+' : '') + h + ':00';
+    if (h === state.tz) o.selected = true;
+    sel.appendChild(o);
+  }
+}
+function saveTz() {
+  state.tz = parseInt(document.getElementById('tz-sel').value);
+  saveSettings();
+  if (db) db.collection('seabridge').doc('main').set({ tz: state.tz }, { merge: true }).catch(() => {});
+}
+function detectTz() {
+  state.tz = -new Date().getTimezoneOffset() / 60;
+  buildTzSelect();
+  saveSettings();
+  if (db) db.collection('seabridge').doc('main').set({ tz: state.tz }, { merge: true }).catch(() => {});
+}
+function saveVessel() {
+  state.vesselName = document.getElementById('s-vessel').value;
+  state.position = document.getElementById('s-pos').value;
+  state.signonDate = document.getElementById('s-on').value;
+  state.signoffDate = document.getElementById('s-off').value;
+  saveSettings();
+  updateSubtitle();
+  if (db) db.collection('seabridge').doc('main').set({ vesselName: state.vesselName, position: state.position, signonDate: state.signonDate, signoffDate: state.signoffDate }, { merge: true }).catch(() => {});
+}
+function saveLocation() {
+  state.shipLat = parseFloat(document.getElementById('s-lat').value) || 5.6;
+  state.shipLng = parseFloat(document.getElementById('s-lng').value) || -0.2;
+  state.shipArea = document.getElementById('s-area').value;
+  saveSettings();
+  if (db) db.collection('seabridge').doc('main').set({ shipLat: state.shipLat, shipLng: state.shipLng, shipArea: state.shipArea }, { merge: true }).catch(() => {});
+}
+function fillSettingsFields() {
+  const v = (id, val) => { const e = document.getElementById(id); if (e) e.value = val || ''; };
+  v('s-vessel', state.vesselName); v('s-pos', state.position);
+  v('s-on', state.signonDate); v('s-off', state.signoffDate);
+  v('s-lat', state.shipLat); v('s-lng', state.shipLng); v('s-area', state.shipArea);
+}
+function updateSubtitle() {
+  const parts = [];
+  if (state.vesselName) parts.push(state.vesselName);
+  if (state.shipArea) parts.push(state.shipArea);
+  setText('ivy-subtitle', parts.join(' · ') || 'Maxwell is at sea');
+}
+
+// ═══════════════════════════════════════════
+// SCHEDULE EDITOR
+// ═══════════════════════════════════════════
+function openModal() {
+  tempSched = JSON.parse(JSON.stringify(state.schedule.length ? state.schedule : DEFAULT_SCHED));
+  renderModal();
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function renderModal() {
+  const c = document.getElementById('modalRows');
+  c.innerHTML = '';
+  tempSched.forEach((a, i) => {
+    const div = document.createElement('div');
+    div.className = 'edit-row';
+    div.innerHTML =
+      '<div class="edit-fields">' +
+      '<input class="m-inp" value="' + a.start + '" placeholder="07:00" onchange="tempSched[' + i + '].start=this.value">' +
+      '<input class="m-inp" value="' + a.end + '" placeholder="08:00" onchange="tempSched[' + i + '].end=this.value">' +
+      '<input class="m-inp" value="' + a.name + '" placeholder="Activity name" onchange="tempSched[' + i + '].name=this.value" style="font-family:Inter,sans-serif">' +
+      '</div><div style="display:flex;gap:8px;align-items:center">' +
+      '<select class="e-sel" onchange="tempSched[' + i + '].emoji=this.value">' +
+      EMOJIS.map(e => '<option' + (e === a.emoji ? ' selected' : '') + '>' + e + '</option>').join('') +
+      '</select><button class="del-btn" onclick="delRow(' + i + ')">✕ Remove</button></div>';
+    c.appendChild(div);
+  });
+}
+function addRow() { tempSched.push({ start: '09:00', end: '10:00', name: 'Activity', emoji: '📋' }); renderModal(); }
+function delRow(i) { tempSched.splice(i, 1); renderModal(); }
+function saveModal() {
+  state.schedule = JSON.parse(JSON.stringify(tempSched));
+  saveSettings();
+  if (db) db.collection('seabridge').doc('main').set({ schedule: state.schedule }, { merge: true }).catch(() => {});
+  closeModal();
+  renderSchedule();
+}
+
+// ═══════════════════════════════════════════
+// ROLE SWITCH
+// ═══════════════════════════════════════════
+function setRole(r) {
+  role = r;
+  document.getElementById('btn-mx').classList.toggle('active', r === 'maxwell');
+  document.getElementById('btn-ivy').classList.toggle('active', r === 'ivy');
+  document.getElementById('view-maxwell').classList.toggle('active', r === 'maxwell');
+  document.getElementById('view-ivy').classList.toggle('active', r === 'ivy');
+}
+
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+function mxTab(t) {
+  ['schedule', 'messages', 'settings'].forEach((n, i) => {
+    document.querySelectorAll('#view-maxwell .tab')[i].classList.toggle('active', n === t);
+    const p = document.getElementById('mx-pane-' + n); if (p) p.classList.toggle('active', n === t);
+  });
+}
+function ivyTab(t) {
+  ['schedule', 'messages'].forEach((n, i) => {
+    document.querySelectorAll('#view-ivy .tab')[i].classList.toggle('active', n === t);
+    const p = document.getElementById('ivy-pane-' + n); if (p) p.classList.toggle('active', n === t);
+  });
+}
+
+// ═══════════════════════════════════════════
+// FIREBASE (loads in background)
+// ═══════════════════════════════════════════
+function initFirebase() {
+  if (!FB_CFG.apiKey || FB_CFG.apiKey === 'YOUR_API_KEY') return;
+  if (typeof firebase === 'undefined') return;
+  try {
+    firebase.initializeApp(FB_CFG);
+    db = firebase.firestore();
+    db.enablePersistence().catch(() => {});
+    // Listen to settings
+    db.collection('seabridge').doc('main').onSnapshot(snap => {
+      if (snap.exists) {
+        const d = snap.data();
+        if (d.tz !== undefined) state.tz = Number(d.tz);
+        if (d.schedule && d.schedule.length) state.schedule = d.schedule;
+        if (d.vesselName !== undefined) state.vesselName = d.vesselName;
+        if (d.shipLat) state.shipLat = d.shipLat;
+        if (d.shipLng) state.shipLng = d.shipLng;
+        if (d.shipArea !== undefined) state.shipArea = d.shipArea;
+        saveSettings();
+        renderSchedule(); updateSubtitle(); fillSettingsFields(); buildTzSelect();
+      }
+    }, () => {});
+    // Listen to messages
+    db.collection('seabridge').doc('main').collection('messages')
+      .orderBy('ts').onSnapshot(snap => {
+        state.messages = [];
+        snap.forEach(doc => state.messages.push({ id: doc.id, ...doc.data() }));
+        saveMessages();
+        renderMessages();
+      }, () => {});
+  } catch(e) { console.warn('Firebase init failed:', e.message); }
+}
+
+// ═══════════════════════════════════════════
+// BOOT — clocks start immediately, nothing blocks
+// ═══════════════════════════════════════════
+loadSettings();
+loadMessages();
+buildTzSelect();
+fillSettingsFields();
+updateSubtitle();
+renderSchedule();
+renderMessages();
+tick();
+setInterval(tick, 1000);
+
+// Load Firebase in background
+(function() {
+  const s1 = document.createElement('script');
+  s1.src = 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js';
+  s1.onload = function() {
+    const s2 = document.createElement('script');
+    s2.src = 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js';
+    s2.onload = function() { try { initFirebase(); } catch(e) {} };
+    s2.onerror = function() {};
+    document.head.appendChild(s2);
+  };
+  s1.onerror = function() {};
+  document.head.appendChild(s1);
+})();
+</script>
 </body>
 </html>

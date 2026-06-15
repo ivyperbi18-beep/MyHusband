@@ -271,13 +271,27 @@ function send(){
   const urg=document.getElementById('urgentToggle');
   const text=inp.value.trim();if(!text)return;
   const urgent=urg.checked;inp.value='';urg.checked=false;
-  const msg={from:ME,text,urgent,ts:Date.now(),read:false};
+  const msg={from:ME,text,urgent,ts:Date.now(),read:false,id:'msg_'+Date.now()+'_'+Math.random().toString(36).slice(2)};
+  data.messages.push(msg);
+  renderMessages();
+  syncMsgs();
   if(db){
     db.collection('seabridge').doc(currentContract).collection('messages')
-      .add({...msg,ts:firebase.firestore.FieldValue.serverTimestamp()})
-      .catch(()=>{data.messages.push(msg);renderMessages();syncLocal()});
-  }else{data.messages.push(msg);renderMessages();syncLocal()}
+      .add({from:msg.from,text:msg.text,urgent:msg.urgent,ts:firebase.firestore.FieldValue.serverTimestamp(),read:false})
+      .catch(()=>{});
+  }
 }
+function syncMsgs(){
+  try{localStorage.setItem('sb_msgs_'+currentContract,JSON.stringify(data.messages))}catch(e){}
+}
+function loadMsgs(){
+  try{const s=localStorage.getItem('sb_msgs_'+currentContract);if(s)data.messages=JSON.parse(s)}catch(e){}
+}
+window.addEventListener('storage',function(e){
+  if(e.key==='sb_msgs_'+currentContract){
+    try{data.messages=JSON.parse(e.newValue)||[];renderMessages()}catch(err){}
+  }
+});
 
 function renderMessages(){
   const el=document.getElementById('msgList');if(!el)return;
@@ -350,10 +364,14 @@ function switchTab(tab){
 // ── STORAGE ──
 function loadLocal(){
   const s=localStorage.getItem('sb_ivy_'+currentContract);
-  if(s){try{Object.assign(data,JSON.parse(s))}catch(e){}}
+  if(s){try{const d=JSON.parse(s);data.tz=d.tz||0;data.vesselName=d.vesselName||'';data.shipLat=d.shipLat||5.6;data.shipLng=d.shipLng||-0.2;data.shipArea=d.shipArea||'Gulf of Guinea';data.schedule=d.schedule||data.schedule}catch(e){}}
+  loadMsgs();
   renderAll();
 }
-function syncLocal(){try{localStorage.setItem('sb_ivy_'+currentContract,JSON.stringify(data))}catch(e){}}
+function syncLocal(){
+  const save={tz:data.tz,vesselName:data.vesselName,shipLat:data.shipLat,shipLng:data.shipLng,shipArea:data.shipArea,schedule:data.schedule};
+  try{localStorage.setItem('sb_ivy_'+currentContract,JSON.stringify(save))}catch(e){}
+}
 
 // ── FIREBASE ──
 function listenData(){
@@ -368,14 +386,17 @@ function listenData(){
       if(d.shipLng!==undefined)data.shipLng=d.shipLng;
       if(d.shipArea!==undefined)data.shipArea=d.shipArea;
       if(d.locationUpdated)data.locationUpdated=d.locationUpdated.toDate?d.locationUpdated.toDate():new Date(d.locationUpdated);
-      renderAll();
-    }syncLocal();
+      renderAll();syncLocal();
+    }
   },()=>loadLocal());
 }
 function listenMsgs(){
   if(!db)return;
   db.collection('seabridge').doc(currentContract).collection('messages').orderBy('ts').onSnapshot(snap=>{
-    data.messages=[];snap.forEach(doc=>data.messages.push({id:doc.id,...doc.data()}));renderMessages();
+    data.messages=[];
+    snap.forEach(doc=>data.messages.push({id:doc.id,...doc.data()}));
+    syncMsgs();
+    renderMessages();
   },()=>{});
 }
 function initFirebase(){

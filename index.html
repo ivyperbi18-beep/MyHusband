@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SeaBridge</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#0a1628;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.logo{font-size:28px;font-weight:600;color:#00b4d8;letter-spacing:.05em;margin-bottom:6px}
+.logo span{color:#8899aa;font-weight:300}
+.tagline{font-size:13px;color:#4a5568;margin-bottom:48px}
+.btn{display:flex;align-items:center;gap:14px;width:100%;max-width:300px;padding:18px 20px;border-radius:16px;border:1px solid;text-decoration:none;margin-bottom:14px;transition:transform .15s,opacity .15s}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn-maxwell{background:rgba(0,180,216,.08);border-color:rgba(0,180,216,.3)}
+.btn-ivy{background:rgba(244,162,97,.08);border-color:rgba(244,162,97,.3)}
+.btn-icon{font-size:28px;flex-shrink:0}
+.btn-text{}
+.btn-name{font-size:16px;font-weight:600}
+.btn-maxwell .btn-name{color:#00b4d8}
+.btn-ivy .btn-name{color:#f4a261}
+.btn-sub{font-size:11px;color:#4a5568;margin-top:2px}
+.footer{font-size:11px;color:#2a3548;margin-top:40px;text-align:center}
+</style>
+</head>
+<body>
+<div class="logo">Sea<span>Bridge</span></div>
+<div class="tagline">Who are you?</div>
+
+<a class="btn btn-maxwell" href="maxwell.html">
+  <div class="btn-icon">⚓</div>
+  <div class="btn-text">
+    <div class="btn-name">Maxwell</div>
+    <div class="btn-sub">Full access · Edit & manage</div>
+  </div>
+</a>
+
+<a class="btn btn-ivy" href="ivy.html">
+  <div class="btn-icon">🌸</div>
+  <div class="btn-text">
+    <div class="btn-name">Ivy</div>
+    <div class="btn-sub">View Maxwell's schedule & chat</div>
+  </div>
+</a>
+
+<div class="footer">SeaBridge · Keeping you connected at sea</div>
+</body>
+</html>

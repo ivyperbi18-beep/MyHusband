@@ -260,8 +260,15 @@ let data={schedule:JSON.parse(JSON.stringify(DEFAULT_SCHEDULE)),tz:0,vesselName:
 
 // ── CLOCKS ── (runs independently of everything else)
 function getTime(off){const n=new Date();return new Date(n.getTime()+n.getTimezoneOffset()*60000+off*3600000)}
-function fmt(d){return d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
-function fmtD(d){return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}
+function fmt(d){
+  const h=d.getHours(),m=d.getMinutes();
+  return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;
+}
+function fmtD(d){
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return days[d.getDay()]+' '+d.getDate()+' '+months[d.getMonth()];
+}
 function set(id,v){const e=document.getElementById(id);if(e)e.textContent=v}
 
 function tick(){
@@ -277,7 +284,7 @@ function tick(){
 function toMin(t){const[h,m]=t.split(':').map(Number);return h*60+m}
 function getCurrentAct(mt){
   const now=mt.getHours()*60+mt.getMinutes();
-  for(const a of data.schedule){
+  for(const a of (data.schedule&&data.schedule.length?data.schedule:DEFAULT_SCHEDULE)){
     let s=toMin(a.start),e=toMin(a.end);
     if(e<=s)e+=1440; let c=now; if(c<s)c+=1440;
     if(c>=s&&c<e) return{...a,progress:(c-s)/(e-s)*100,left:e-c};
@@ -305,7 +312,8 @@ function updateActivity(mt){
 function renderSchedule(){
   const mt=getTime(data.tz), el=document.getElementById('scheduleList');
   if(!el)return; el.innerHTML='';
-  data.schedule.forEach(a=>{
+  const sched=data.schedule&&data.schedule.length?data.schedule:DEFAULT_SCHEDULE;
+  sched.forEach(a=>{
     const st=getStatus(a,mt), div=document.createElement('div');
     div.className='schedule-item '+st;
     div.innerHTML='<div class="schedule-time">'+a.start+' – '+a.end+'</div>'+
@@ -335,8 +343,8 @@ function renderMessages(){
   data.messages.forEach(msg=>{
     const ts=msg.ts?(typeof msg.ts==='number'?msg.ts:msg.ts.seconds?msg.ts.seconds*1000:Date.parse(msg.ts)):Date.now();
     const d=new Date(ts);
-    const dateStr=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
-    const timeStr=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const dateStr=(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()])+' '+d.getDate()+' '+(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]);
+    const timeStr=((h,m)=>(h<10?'0':'')+h+':'+(m<10?'0':'')+m)(d.getHours(),d.getMinutes());
     const isMine=msg.from===ME;
     const dir=isMine?'out':'inc';
     let div=''; if(dateStr!==lastDate){div='<div class="msg-date-divider">'+dateStr+'</div>';lastDate=dateStr}
